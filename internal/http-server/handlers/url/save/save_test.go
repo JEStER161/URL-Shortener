@@ -2,7 +2,7 @@ package save_test
 
 import (
 	"URL-Shortener/internal/http-server/handlers/url/save"
-	"URL-Shortener/internal/lib/logger/handllers/slogdiscard"
+	"URL-Shortener/internal/lib/logger/handlers/slogdiscard"
 	"bytes"
 	"encoding/json"
 	"errors"
