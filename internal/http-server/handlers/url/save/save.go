@@ -15,7 +15,7 @@ import (
 )
 
 type Request struct {
-	URL   string `json:"url" validate:"required, url"`
+	URL   string `json:"url" validate:"required,url"`
 	Alias string `json:"alias,omitempty"`
 }
 
@@ -68,10 +68,18 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		}
 
 		id, err := urlSaver.SaveURL(req.URL, alias)
-		if errors.Is(err, storage.ErrURLExists){
+		if errors.Is(err, storage.ErrURLExists) {
 			log.Info("url already exists", slog.String("url", req.URL))
 
 			render.JSON(w, r, resp.Error("url already exists"))
+
+			return
+		}
+
+		if err != nil {
+			log.Error("failed to add url", sl.Err(err))
+
+			render.JSON(w, r, resp.Error("failed to add url"))
 
 			return
 		}
@@ -80,8 +88,8 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		render.JSON(w, r, Response{
 			Response: resp.OK(),
-			Alias: alias,
+			Alias:    alias,
 		})
-		
+
 	}
 }

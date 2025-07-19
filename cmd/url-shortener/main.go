@@ -25,7 +25,7 @@ func main() {
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
-	log.Info("starting url-shortener", slog.String("env", cfg.Env)) //                      //
+	log.Info("starting url-shortener", slog.String("env", cfg.Env)) //
 
 	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
