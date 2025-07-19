@@ -2,6 +2,7 @@ package main
 
 import (
 	"URL-Shortener/internal/config"
+	"URL-Shortener/internal/http-server/handlers/redirect"
 	"URL-Shortener/internal/http-server/handlers/url/save"
 	"URL-Shortener/internal/http-server/middleware/logger"
 	"URL-Shortener/internal/lib/logger/handllers/slogpretty"
@@ -25,7 +26,7 @@ func main() {
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
-	log.Info("starting url-shortener", slog.String("env", cfg.Env)) //
+	log.Info("starting url-shortener", slog.String("env", cfg.Env))
 
 	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
@@ -41,21 +42,22 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Post("/url", save.New(log, storage))
+	router.Get("/{alias}", redirect.New(log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
 	srv := &http.Server{
-		Addr: cfg.Address,
-		Handler: router,
-		ReadTimeout: cfg.HTTPServer.Timeout,
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
 		WriteTimeout: cfg.HTTPServer.Timeout,
-		IdleTimeout: cfg.HTTPServer.IdleTimeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
 
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error("failed to start server")
 	}
-	
+
 	log.Error("server stopped")
 }
 
